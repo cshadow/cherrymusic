@@ -263,7 +263,17 @@ class ID3(TinyTag):
     def _decode_string(self, b):
         # it's not my fault, this is the spec.
         if b[:1] == b'\x00':
-            return self._unpad(codecs.decode(b[1:], 'ISO-8859-1'))
+            # return self._unpad(codecs.decode(b[1:], 'ISO-8859-1'))
+            ret = False
+            try:
+                if not ret: ret = self._unpad(codecs.decode(b[1:], 'EUC-KR'))
+            except:
+                pass
+            try:
+                if not ret: ret = self._unpad(codecs.decode(b[1:], 'UTF-8'))
+            except:
+                ret = self._unpad(codecs.decode(b[1:], 'ISO-8859-1'))
+            return ret
         if b[0:3] == b'\x01\xff\xfe':
             bytestr = b[3:-1] if len(b) % 2 == 0 else b[3:]
             return codecs.decode(bytestr, 'UTF-16')
