@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.35.2"
+VERSION = "0.36.0"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -262,12 +262,23 @@ def start_server(cfg_override=None):
 def create_user(username, password):
     """ Creates a non-admin user with given username and password """
     non_alnum = re.compile('[^a-z0-9]', re.IGNORECASE)
-    if non_alnum.findall(username) or non_alnum.findall(password):
-        log.e(_('username and password may only contain english letters'
-                ' and digits'))
+    if non_alnum.findall(username):
+        log.e(_('usernames may only contain letters and digits'))
         return False
     return service.get('users').addUser(username, password, admin=False)
 
+def delete_user(username):
+    userservice = service.get('users')
+    userid = userservice.getIdByName(username)
+    if userid is None:
+        log.e(_('user with the name "%s" does not exist!'), username)
+        return False
+    return userservice.deleteUser(userid)
+
+def change_password(username, password):
+    userservice = service.get('users')
+    result = userservice.changePassword(username, password)
+    return result == 'success'
 
 def update_filedb(paths):
     """ Updates the file database in a separate thread,
@@ -337,7 +348,7 @@ class CherryMusic:
                         os.getpgid(int(pidfile.read()))
                     sys.exit(_("""============================================
 Process id file %s already exists.
-I've you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
+If you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
 ============================================""") % pathprovider.pidFile())
                 except OSError:
                     print('Stale process id file, removing.')

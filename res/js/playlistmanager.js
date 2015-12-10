@@ -189,6 +189,11 @@ ManagedPlaylist.prototype = {
                 if(typeof b.meta !== 'undefined'){
                     value_b = b.meta[sort_by];
                 }
+                // sort numerically if both values start with numbers
+                if(!!value_a.match(/^\d+/) && !!value_b.match(/^\d+/)){
+                    return parseInt(value_a) - parseInt(value_b);
+                }
+                // otherwise sort alphabetically
                 if(value_a > value_b){
                     return 1;
                 } else if(value_a < value_b){
@@ -557,8 +562,9 @@ PlaylistManager.prototype = {
                 isunsaved += ' <em>(unsaved)</em>';
             }
 
-
-            pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+ isunsaved;
+            // fix for CVE-2015-8310
+            var escaped_playlist_name = $("<div>").text(pl.name).html();
+            pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+escaped_playlist_name + isunsaved;
             if(pl.closable){
                 pltabs += '<span class="playlist-tab-closer pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';
             }
@@ -746,7 +752,7 @@ PlaylistManager.prototype = {
     setAlbumArtDisplay : function(track) {
         if(userOptions.ui.display_album_art){
             // strip filename from url
-            var directory = track.url.substring(0,track.url.lastIndexOf('/'))
+            var directory = track.url;
             if (directory == '') // root directory
                 directory = '/';
             var api_param = JSON.stringify({directory: directory});
