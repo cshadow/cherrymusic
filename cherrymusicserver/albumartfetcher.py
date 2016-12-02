@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2015 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2016 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -80,6 +80,12 @@ class AlbumArtFetcher:
     imageMagickAvailable = programAvailable('convert')
 
     methods = {
+        'itunes': {
+            'url': "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/wa/wsSearch?entity=album&term=",
+            'regexes': [
+                'artworkUrl60":"([^"]+)"',
+            ],
+        },
         'amazon': {
             'url': "http://www.amazon.com/s/?field-keywords=",
             'regexes': [
@@ -96,13 +102,9 @@ class AlbumArtFetcher:
         #     'url': "http://www.buy.com/sr/srajax.aspx?from=2&qu=",
         #     'regexes': [' class="productImageLink"><img src="([^"]*)"']
         # },
-        'google': {
-            'url': "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&imgsz=medium&rsz=8&q=",
-            'regexes': ['"url":"([^"]*)"', '"unescapedUrl":"([^"]*)"']
-        },
     }
 
-    def __init__(self, method='amazon', timeout=10):
+    def __init__(self, method='itunes', timeout=10):
         """define the urls of the services and a regex to fetch images
         """
         self.MAX_IMAGE_SIZE_BYTES = 100*1024
@@ -113,7 +115,7 @@ class AlbumArtFetcher:
             log.e(_(('''unknown album art fetch method: '%(method)s', '''
                      '''using default.''')),
                   {'method': method})
-            method = 'google'
+            method = 'itunes'
         self.method = method
         self.timeout = timeout
 
@@ -166,10 +168,6 @@ class AlbumArtFetcher:
             return header, data
         return None, ''
 
-        
-        return None, ''
-
-
     def fetchurls(self, searchterm):
         """fetch image urls based on the provided searchterms
 
@@ -180,8 +178,6 @@ class AlbumArtFetcher:
         method = self.methods[self.method]
         # use unidecode if it's available
         searchterm = unidecode(searchterm).lower()
-        # make sure the searchterms are only letters and spaces
-        searchterm = re.sub('[^a-z\s]', ' ', searchterm)
         # the keywords must always be appenable to the method-url
         url = method['url']+urllib.parse.quote(searchterm)
         #download the webpage and decode the data to utf-8

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2015 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2016 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -37,6 +37,7 @@ import os  # shouldn't have to list any folder in the future!
 import json
 import cherrypy
 import codecs
+import re
 import sys
 
 try:
@@ -128,7 +129,10 @@ class HTTPHandler(object):
         ssl_enabled = cherry.config['server.ssl_enabled']
         if ssl_enabled and not is_secure_connection:
             log.d(_('Not secure, redirecting...'))
-            ip = ipAndPort[:ipAndPort.rindex(':')]
+            try:
+                ip = ipAndPort[:ipAndPort.rindex(':')]
+            except ValueError:
+                ip = ipAndPort  # when using port 80: port is not in ipAndPort
             url = 'https://' + ip + ':' + str(cherry.config['server.ssl_port'])
             if redirect_unencrypted:
                 raise cherrypy.HTTPRedirect(url, 302)
@@ -436,10 +440,26 @@ class HTTPHandler(object):
             cherrypy.response.headers.update(header)
             return data
         elif cherry.config['media.fetch_album_art']:
+            # maximum of files to try to fetch metadata for albumart keywords
+            METADATA_ALBUMART_MAX_FILES = 10
             #fetch album art from online source
             try:
                 foldername = os.path.basename(directory)
                 keywords = foldername
+                # remove any odd characters from the folder name
+                keywords = re.sub('[^A-Za-z\s]', ' ', keywords)
+                # try getting metadata from files in the folder for a more
+                # accurate match
+                files = os.listdir(localpath)
+                for i, filename in enumerate(files):
+                    if i >= METADATA_ALBUMART_MAX_FILES:
+                        break
+                    path = os.path.join(localpath, filename)
+                    metadata = metainfo.getSongInfo(path)
+                    if metadata.artist and metadata.album:
+                        keywords = '{} - {}'.format(metadata.artist, metadata.album)
+                        break
+
                 log.i(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
                 header, data = fetcher.fetch(keywords)
                 if header:

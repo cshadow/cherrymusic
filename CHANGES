@@ -1,6 +1,33 @@
 Changelog
 ---------
 
+0.39.1 (2016-10-09)
+ - FIXED: broken import
+
+0.39.0 (2016-10-09)
+ - FEATURE: ... new feature here!
+ - FIXED:
+ - IMPROVEMENT:
+
+0.38.0 (2016-09-17)
+ - FEATURE: Use file metadata when album art fetching (thanks mattss)
+ - IMPROVEMENT: Switch to iTunes API for album art fetching (thanks mattss)
+ - IMPROVEMENT: Better filtering of directory names when fetching album art (thanks mattss)
+
+0.37.2 (2016-08-07)
+ - FIXED: more fixes for cherrypy detection (thanks Isgar)
+
+0.37.1 (2016-07-30)
+ - FIXED: crash on start when not able to detect cherrypy version
+
+0.37.0 (2016-07-09)
+ - FEATURE: support for reading MP4 tags
+ - FIXED: unicode crash when using cherrypy > 5.4
+ - FIXED: running the server directly on port 80
+ - FIXED: transcoding of OGG files with other samplerates than 44khz
+ - IMPROVEMENT: documented --deleteuser and --changepassword switches
+ - IMPROVEMENT: don't show remaining time in shuffle mode
+
 0.36.0 (2015-11-21)
  - FIXED: *Security* CVE-2015-8309 Download of arbitrary files by logged in users (thanks 
 feedersec)

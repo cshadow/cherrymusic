@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2015 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2016 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -184,16 +184,16 @@ class Performance:
         if PERFORMANCE_TEST:
             self.time = time()
             Performance.indentation += 1
-            log.w('|   ' * (Performance.indentation - 1)
-                  + '/ˉˉ' + self.text)
+            log.w('│  ' * (Performance.indentation - 1)
+                  + '╭──' + self.text)
             return self
 
     def __exit__(self, type, value, traceback):
         global PERFORMANCE_TEST
         if PERFORMANCE_TEST:
             duration = (time() - self.time) * 1000
-            log.w('|   ' * (Performance.indentation-1)
-                  + '\__ %g ms' % (duration,))
+            log.w('│  ' * (Performance.indentation-1)
+                  + '╰──%g ms' % (duration,))
             Performance.indentation -= 1
 
     def log(self, text):
