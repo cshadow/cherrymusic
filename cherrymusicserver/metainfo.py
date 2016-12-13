@@ -55,7 +55,7 @@ class Metainfo():
 
 def getSongInfo(filepath):
     try:
-        tag = TinyTag.get(filepath,False,False)
+        tag = TinyTag.get(filepath)
     except LookupError:
         return Metainfo()
     # make sure everthing returned (except length) is a string

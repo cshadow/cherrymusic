@@ -289,7 +289,7 @@ PlaylistManager = function(){
     });
     this.initJPlayer();
 }
-
+var add_song_queue = [];
 PlaylistManager.prototype = {
     initJPlayer : function(){
         "use strict";
@@ -837,10 +837,17 @@ PlaylistManager.prototype = {
                 //only rerender playlist if it would visually change
                 self.getEditingPlaylist().jplayerplaylist._refresh(true);
             }
+            add_song_queue.splice(add_song_queue.indexOf(path),1);
         }
         // WORKAROUND: delay the meta-data fetching, so that a request
         // for the actual audio data comes through frist
-         window.setTimeout(
+        if (add_song_queue.indexOf(path)>-1) {
+            return;
+        }
+        else {
+            add_song_queue.push(path);
+        }
+        window.setTimeout(
             function(){
                 api('getsonginfo', {'path': decodeURIComponent(path)}, success, errorFunc('error getting song metainfo'), true);
             },
