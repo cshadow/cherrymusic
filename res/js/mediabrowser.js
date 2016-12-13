@@ -257,6 +257,8 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     });
 }
 
+var song_queue = [];
+
 MediaBrowser.static = {
     _renderList: function (l, listview){
         "use strict";
@@ -408,10 +410,17 @@ MediaBrowser.static = {
             if(!above_screen && !below_screen){
                 var self = jqelem;
                 var path_url_enc = jqelem.attr('path');
+                if (song_queue.indexOf(path_url_enc)>-1) {
+                    return;
+                }
+                else {
+                    song_queue.push(path_url_enc);
+                }
                 var success = function(data){
                     $(self).show();
                     var metainfo = $.parseJSON(data);
                     renderMetaData($(self), metainfo);
+                    song_queue.splice(song_queue.indexOf(path_url_enc),1);
                 }
                 var complete = function(){
                     jqelem.removeClass('unloaded');
